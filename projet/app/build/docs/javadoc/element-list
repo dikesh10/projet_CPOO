@@ -1,0 +1,9 @@
+org.example
+org.projet
+org.projet.analyzer
+org.projet.config
+org.projet.evaluator
+org.projet.keyboard.config
+org.projet.keyboard.model
+org.projet.model
+org.projet.optimizer
