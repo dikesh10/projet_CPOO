@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"org.example"},{"l":"org.projet"},{"l":"org.projet.analyzer"},{"l":"org.projet.config"},{"l":"org.projet.evaluator"},{"l":"org.projet.keyboard.config"},{"l":"org.projet.keyboard.model"},{"l":"org.projet.model"},{"l":"org.projet.optimizer"}];updateSearchResults();

@@ -194,31 +194,49 @@ public class LayoutEvaluator {
     public void displayEvaluation(KeyboardLayout layout) {
         double score = evaluateLayout(layout);
         
-        System.out.println("\nÉvaluation de la disposition " + layout.name() + " :");
-        System.out.println("Score global : " + String.format("%.2f", score));
+        System.out.println("\nÉvaluation détaillée de la disposition " + layout.name() + " :");
+        System.out.println("=".repeat(50));
         
-        System.out.println("\nStatistiques des mouvements :");
-        System.out.println("Bigrammes (" + totalBigramCount + " total) :");
+        // Afficher les charges des doigts
+        System.out.println("\nCharges des doigts (%) :");
+        System.out.println("-".repeat(30));
+        for (Map.Entry<KeyboardLayout.Finger, Double> entry : fingerLoads.entrySet()) {
+            System.out.printf("%-15s : %6.2f%%\n", entry.getKey(), entry.getValue());
+        }
+        
+        // Afficher les statistiques des mouvements avec leurs contributions au score
+        System.out.println("\nContribution des mouvements au score :");
+        System.out.println("-".repeat(50));
+        System.out.println("Type de mouvement      Poids    Occurrences    Impact sur score");
+        System.out.println("-".repeat(50));
+        
+        // Bigrammes
+        System.out.println("\nBigrammes (" + totalBigramCount + " total) :");
         displayMovementStats(MovementType.SAME_FINGER, "Même doigt", totalBigramCount);
         displayMovementStats(MovementType.LATERAL_STRETCH, "Extension latérale", totalBigramCount);
         displayMovementStats(MovementType.SCISSORS, "Ciseaux", totalBigramCount);
-        displayMovementStats(MovementType.HAND_ALTERNATION, "Alternance des mains", totalBigramCount);
+        displayMovementStats(MovementType.HAND_ALTERNATION, "Alternance mains", totalBigramCount);
         displayMovementStats(MovementType.INWARD_ROLL, "Roulement intérieur", totalBigramCount);
+        displayMovementStats(MovementType.OUTWARD_ROLL, "Roulement extérieur", totalBigramCount);
         
+        // Trigrammes
         System.out.println("\nTrigrammes (" + totalTrigramCount + " total) :");
         displayMovementStats(MovementType.BAD_REDIRECTION, "Mauvaise redirection", totalTrigramCount);
         displayMovementStats(MovementType.REDIRECTION, "Redirection", totalTrigramCount);
         displayMovementStats(MovementType.SAME_FINGER_SKIPGRAM, "Skipgram même doigt", totalTrigramCount);
         
-        System.out.println("\nCharges des doigts :");
-        for (var entry : fingerLoads.entrySet()) {
-            System.out.printf("%s : %.1f%%\n", entry.getKey(), entry.getValue());
-        }
+        System.out.println("\nScore global : " + String.format("%.2f", score));
+        System.out.println("Plus le score est bas, meilleure est la disposition.");
+        System.out.println("=".repeat(50));
     }
     
     private void displayMovementStats(MovementType type, String label, long total) {
-        long count = movementCounts.get(type);
-        double percentage = total > 0 ? (count * 100.0) / total : 0;
-        System.out.printf("%s : %d (%.1f%%)\n", label, count, percentage);
+        long count = movementCounts.getOrDefault(type, 0L);
+        double weight = weights.get(type);
+        double impact = count * weight;
+        double percentage = total > 0 ? (count * 100.0) / total : 0.0;
+        
+        System.out.printf("%-20s %6.2f %8d (%5.1f%%) %10.2f\n",
+            label, weight, count, percentage, impact);
     }
 }

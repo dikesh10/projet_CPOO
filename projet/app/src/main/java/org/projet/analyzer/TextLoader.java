@@ -39,8 +39,7 @@ public class TextLoader {
      */
     public static void analyzeDirectory(TextAnalyzer analyzer, Path directoryPath) throws IOException {
         try (Stream<Path> paths = Files.walk(directoryPath)) {
-            paths.parallel()  // Rend le stream parallèle pour un traitement concurrent
-                .filter(Files::isRegularFile)
+            paths.filter(Files::isRegularFile)
                 .filter(path -> path.toString().endsWith(".txt"))
                 .forEach(path -> {
                     try {
