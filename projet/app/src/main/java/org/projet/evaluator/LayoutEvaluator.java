@@ -200,9 +200,12 @@ public class LayoutEvaluator {
         // Afficher la formule du score
         System.out.println("\nFormule du score :");
         System.out.println("-".repeat(30));
-        System.out.println("Score = Σ(nombre_occurrences × poids)");
-        System.out.println("où poids = {");
-        System.out.println("  // Pénalités (mouvements indésirables)");
+        System.out.println("Score = Score_bigrammes + Score_trigrammes");
+        System.out.println("où :");
+        System.out.println("  Score_bigrammes = Σ(occurrences_bigramme × poids_bigramme)");
+        System.out.println("  Score_trigrammes = Σ(occurrences_trigramme × poids_trigramme)");
+        System.out.println("\nPoids = {");
+        System.out.println("  // Pénalités (mouvements indésirables) -> augmentent le score");
         System.out.println("  même_doigt          : +2.00");
         System.out.println("  extension_latérale  : +1.50");
         System.out.println("  ciseaux            : +1.80");
@@ -210,11 +213,13 @@ public class LayoutEvaluator {
         System.out.println("  redirection        : +1.20");
         System.out.println("  skipgram_même_doigt : +1.60");
         System.out.println();
-        System.out.println("  // Bonus (mouvements favorables)");
+        System.out.println("  // Bonus (mouvements favorables) -> diminuent le score");
         System.out.println("  alternance_mains    : -0.80");
         System.out.println("  roulement_intérieur : -1.00");
         System.out.println("  roulement_extérieur : -0.50");
         System.out.println("}");
+        System.out.println("\nNote : Un score négatif est meilleur car il indique plus de");
+        System.out.println("mouvements favorables (bonus) que de mouvements pénalisés.");
         
         // Afficher les charges des doigts
         System.out.println("\nCharges des doigts (%) :");
