@@ -1,0 +1,105 @@
+@startuml
+
+package org.projet {
+    class App {
+        + main(args: String[]): void
+    }
+}
+
+package org.projet.analyzer {
+    class TextAnalyzer {
+        - nGramFrequencies: Map<String, Integer>
+        + analyzeText(text: String, n: int): void
+        + getFrequency(nGram: String): int
+        + getNGrams(): Set<String>
+    }
+
+    class TextLoader {
+        + loadText(path: Path): String
+        + {static} loadFromDirectory(dir: Path): List<String>
+    }
+}
+
+package org.projet.config {
+    class KeyboardConfigLoader {
+        + loadLayout(path: Path): KeyboardLayout
+        + loadGeometry(path: Path): KeyboardGeometry
+    }
+}
+
+package org.projet.model {
+    class KeyboardLayout {
+        - layout: Map<Character, Key>
+        + getKey(c: Character): Key
+        + getKeys(): Set<Key>
+    }
+
+    class KeyboardGeometry {
+        - keyPositions: Map<Key, Position>
+        + getPosition(key: Key): Position
+    }
+
+    class Key {
+        - row: int
+        - col: int
+        - finger: Finger
+        + getRow(): int
+        + getCol(): int
+        + getFinger(): Finger
+    }
+
+    enum Finger {
+        LEFT_PINKY
+        LEFT_RING
+        LEFT_MIDDLE
+        LEFT_INDEX
+        RIGHT_INDEX
+        RIGHT_MIDDLE
+        RIGHT_RING
+        RIGHT_PINKY
+    }
+}
+
+package org.projet.evaluator {
+    interface LayoutEvaluator {
+        + evaluate(layout: KeyboardLayout): double
+    }
+
+    class MovementEvaluator {
+        - analyzer: TextAnalyzer
+        - geometry: KeyboardGeometry
+        + evaluate(layout: KeyboardLayout): double
+        - evaluateSameFinger(): double
+        - evaluateHandBalance(): double
+        - evaluateFingerBalance(): double
+    }
+}
+
+package org.projet.optimizer {
+    class KeyboardOptimizer {
+        - evaluator: LayoutEvaluator
+        - population: List<KeyboardLayout>
+        + optimize(iterations: int): KeyboardLayout
+        - mutate(layout: KeyboardLayout): KeyboardLayout
+        - crossover(layout1: KeyboardLayout, layout2: KeyboardLayout): KeyboardLayout
+    }
+}
+
+' Relations
+App --> TextAnalyzer
+App --> LayoutEvaluator
+App --> KeyboardOptimizer
+App --> KeyboardConfigLoader
+
+TextAnalyzer --> TextLoader
+
+MovementEvaluator ..|> LayoutEvaluator
+MovementEvaluator --> TextAnalyzer
+MovementEvaluator --> KeyboardGeometry
+
+KeyboardOptimizer --> LayoutEvaluator
+KeyboardLayout --> Key
+KeyboardGeometry --> Key
+Key --> Finger
+
+@enduml
