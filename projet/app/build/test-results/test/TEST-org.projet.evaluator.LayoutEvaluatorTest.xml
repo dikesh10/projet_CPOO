@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="org.projet.evaluator.LayoutEvaluatorTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2025-01-11T23:21:11" hostname="DIKESH" time="0.005">
+<testsuite name="org.projet.evaluator.LayoutEvaluatorTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2025-01-11T23:24:44" hostname="DIKESH" time="0.004">
   <properties/>
-  <testcase name="Test de l'évaluation globale" classname="org.projet.evaluator.LayoutEvaluatorTest" time="0.002"/>
-  <testcase name="Test avec des n-grammes inconnus" classname="org.projet.evaluator.LayoutEvaluatorTest" time="0.001"/>
+  <testcase name="Test de l'évaluation globale" classname="org.projet.evaluator.LayoutEvaluatorTest" time="0.001"/>
+  <testcase name="Test avec des n-grammes inconnus" classname="org.projet.evaluator.LayoutEvaluatorTest" time="0.0"/>
   <testcase name="Test des statistiques de mouvements" classname="org.projet.evaluator.LayoutEvaluatorTest" time="0.001"/>
   <testcase name="Test avec une disposition vide" classname="org.projet.evaluator.LayoutEvaluatorTest" time="0.0"/>
   <testcase name="Test de l'équilibre des mains" classname="org.projet.evaluator.LayoutEvaluatorTest" time="0.0"/>

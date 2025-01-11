@@ -197,6 +197,25 @@ public class LayoutEvaluator {
         System.out.println("\nÉvaluation détaillée de la disposition " + layout.name() + " :");
         System.out.println("=".repeat(50));
         
+        // Afficher la formule du score
+        System.out.println("\nFormule du score :");
+        System.out.println("-".repeat(30));
+        System.out.println("Score = Σ(nombre_occurrences × poids)");
+        System.out.println("où poids = {");
+        System.out.println("  // Pénalités (mouvements indésirables)");
+        System.out.println("  même_doigt          : +2.00");
+        System.out.println("  extension_latérale  : +1.50");
+        System.out.println("  ciseaux            : +1.80");
+        System.out.println("  mauvaise_redirection: +1.70");
+        System.out.println("  redirection        : +1.20");
+        System.out.println("  skipgram_même_doigt : +1.60");
+        System.out.println();
+        System.out.println("  // Bonus (mouvements favorables)");
+        System.out.println("  alternance_mains    : -0.80");
+        System.out.println("  roulement_intérieur : -1.00");
+        System.out.println("  roulement_extérieur : -0.50");
+        System.out.println("}");
+        
         // Afficher les charges des doigts
         System.out.println("\nCharges des doigts (%) :");
         System.out.println("-".repeat(30));
@@ -212,25 +231,30 @@ public class LayoutEvaluator {
         
         // Bigrammes
         System.out.println("\nBigrammes (" + totalBigramCount + " total) :");
-        displayMovementStats(MovementType.SAME_FINGER, "Même doigt", totalBigramCount);
-        displayMovementStats(MovementType.LATERAL_STRETCH, "Extension latérale", totalBigramCount);
-        displayMovementStats(MovementType.SCISSORS, "Ciseaux", totalBigramCount);
-        displayMovementStats(MovementType.HAND_ALTERNATION, "Alternance mains", totalBigramCount);
-        displayMovementStats(MovementType.INWARD_ROLL, "Roulement intérieur", totalBigramCount);
-        displayMovementStats(MovementType.OUTWARD_ROLL, "Roulement extérieur", totalBigramCount);
+        double bigramScore = 0.0;
+        bigramScore += displayMovementStats(MovementType.SAME_FINGER, "Même doigt", totalBigramCount);
+        bigramScore += displayMovementStats(MovementType.LATERAL_STRETCH, "Extension latérale", totalBigramCount);
+        bigramScore += displayMovementStats(MovementType.SCISSORS, "Ciseaux", totalBigramCount);
+        bigramScore += displayMovementStats(MovementType.HAND_ALTERNATION, "Alternance mains", totalBigramCount);
+        bigramScore += displayMovementStats(MovementType.INWARD_ROLL, "Roulement intérieur", totalBigramCount);
+        bigramScore += displayMovementStats(MovementType.OUTWARD_ROLL, "Roulement extérieur", totalBigramCount);
+        System.out.printf("Sous-total bigrammes : %.2f\n", bigramScore);
         
         // Trigrammes
         System.out.println("\nTrigrammes (" + totalTrigramCount + " total) :");
-        displayMovementStats(MovementType.BAD_REDIRECTION, "Mauvaise redirection", totalTrigramCount);
-        displayMovementStats(MovementType.REDIRECTION, "Redirection", totalTrigramCount);
-        displayMovementStats(MovementType.SAME_FINGER_SKIPGRAM, "Skipgram même doigt", totalTrigramCount);
+        double trigramScore = 0.0;
+        trigramScore += displayMovementStats(MovementType.BAD_REDIRECTION, "Mauvaise redirection", totalTrigramCount);
+        trigramScore += displayMovementStats(MovementType.REDIRECTION, "Redirection", totalTrigramCount);
+        trigramScore += displayMovementStats(MovementType.SAME_FINGER_SKIPGRAM, "Skipgram même doigt", totalTrigramCount);
+        System.out.printf("Sous-total trigrammes : %.2f\n", trigramScore);
         
         System.out.println("\nScore global : " + String.format("%.2f", score));
+        System.out.printf("             = %.2f (bigrammes) + %.2f (trigrammes)\n", bigramScore, trigramScore);
         System.out.println("Plus le score est bas, meilleure est la disposition.");
         System.out.println("=".repeat(50));
     }
     
-    private void displayMovementStats(MovementType type, String label, long total) {
+    private double displayMovementStats(MovementType type, String label, long total) {
         long count = movementCounts.getOrDefault(type, 0L);
         double weight = weights.get(type);
         double impact = count * weight;
@@ -238,5 +262,7 @@ public class LayoutEvaluator {
         
         System.out.printf("%-20s %6.2f %8d (%5.1f%%) %10.2f\n",
             label, weight, count, percentage, impact);
+            
+        return impact;
     }
 }
