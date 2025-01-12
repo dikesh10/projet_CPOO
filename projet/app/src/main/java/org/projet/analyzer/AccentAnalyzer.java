@@ -9,45 +9,93 @@ import java.util.List;
  * Classe pour analyser les caractères accentués et leurs séquences de touches.
  */
 public class AccentAnalyzer {
-    private final Map<Character, String> accentSequences;
+    private final Map<Character, String> keySequences;
     private final TextAnalyzer textAnalyzer;
+    private static final String SHIFT = "⇧";  // Symbole pour la touche Shift
+    private static final String ALTGR = "⌥";  // Symbole pour la touche AltGr
+    private static final String ALT = "⎇";    // Symbole pour la touche Alt
 
     public AccentAnalyzer(TextAnalyzer textAnalyzer) {
         this.textAnalyzer = textAnalyzer;
-        this.accentSequences = new HashMap<>();
-        initializeAccentSequences();
+        this.keySequences = new HashMap<>();
+        initializeKeySequences();
     }
 
-    private void initializeAccentSequences() {
+    private void initializeKeySequences() {
         // Accents circonflexes
-        accentSequences.put('â', "^a");
-        accentSequences.put('ê', "^e");
-        accentSequences.put('î', "^i");
-        accentSequences.put('ô', "^o");
-        accentSequences.put('û', "^u");
+        keySequences.put('â', "^a");
+        keySequences.put('ê', "^e");
+        keySequences.put('î', "^i");
+        keySequences.put('ô', "^o");
+        keySequences.put('û', "^u");
 
         // Accents aigus
-        accentSequences.put('é', "´e");
-        accentSequences.put('á', "´a");
-        accentSequences.put('í', "´i");
-        accentSequences.put('ó', "´o");
-        accentSequences.put('ú', "´u");
+        keySequences.put('é', "´e");
+        keySequences.put('á', "´a");
+        keySequences.put('í', "´i");
+        keySequences.put('ó', "´o");
+        keySequences.put('ú', "´u");
 
         // Accents graves
-        accentSequences.put('à', "`a");
-        accentSequences.put('è', "`e");
-        accentSequences.put('ì', "`i");
-        accentSequences.put('ò', "`o");
-        accentSequences.put('ù', "`u");
+        keySequences.put('à', "`a");
+        keySequences.put('è', "`e");
+        keySequences.put('ì', "`i");
+        keySequences.put('ò', "`o");
+        keySequences.put('ù', "`u");
 
         // Tréma
-        accentSequences.put('ë', "¨e");
-        accentSequences.put('ï', "¨i");
-        accentSequences.put('ü', "¨u");
-        accentSequences.put('ÿ', "¨y");
+        keySequences.put('ë', "¨e");
+        keySequences.put('ï', "¨i");
+        keySequences.put('ü', "¨u");
+        keySequences.put('ÿ', "¨y");
 
         // Cédille
-        accentSequences.put('ç', "c,");
+        keySequences.put('ç', "c,");
+
+        // Chiffres (nécessitent Shift sur AZERTY)
+        keySequences.put('1', SHIFT + "&");
+        keySequences.put('2', SHIFT + "é");
+        keySequences.put('3', SHIFT + "\"");
+        keySequences.put('4', SHIFT + "'");
+        keySequences.put('5', SHIFT + "(");
+        keySequences.put('6', SHIFT + "-");
+        keySequences.put('7', SHIFT + "è");
+        keySequences.put('8', SHIFT + "_");
+        keySequences.put('9', SHIFT + "ç");
+        keySequences.put('0', SHIFT + "à");
+
+        // Caractères spéciaux nécessitant Shift
+        keySequences.put('§', SHIFT + "!");
+        keySequences.put('/', SHIFT + ":");
+        keySequences.put('*', SHIFT + "$");
+        keySequences.put('+', SHIFT + "=");
+        keySequences.put('?', SHIFT + ",");
+        keySequences.put('>', SHIFT + ".");
+        keySequences.put('<', SHIFT + ",");
+        keySequences.put('£', SHIFT + "$");
+
+        // Caractères avec AltGr
+        keySequences.put('€', ALTGR + "E");
+        keySequences.put('#', ALTGR + "\"");
+        keySequences.put('{', ALTGR + "'");
+        keySequences.put('}', ALTGR + "=");
+        keySequences.put('[', ALTGR + "(");
+        keySequences.put(']', ALTGR + ")");
+        keySequences.put('|', ALTGR + "-");
+        keySequences.put('\\', ALTGR + "_");
+        keySequences.put('@', ALTGR + "à");
+        keySequences.put('~', ALTGR + "é");
+        keySequences.put('¤', ALTGR + "$");
+
+        // Caractères avec Alt
+        keySequences.put('æ', ALT + "f");
+        keySequences.put('œ', ALT + "o");
+        keySequences.put('±', ALT + "+");
+        keySequences.put('≤', ALT + "<");
+        keySequences.put('≥', ALT + ">");
+        keySequences.put('÷', ALT + ":");
+        keySequences.put('×', ALT + "*");
+        keySequences.put('≠', ALT + "=");
     }
 
     /**
@@ -60,10 +108,10 @@ public class AccentAnalyzer {
         // Convertir le texte en séquence de frappes
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
-            String sequence = accentSequences.get(c);
+            String sequence = keySequences.get(c);
             
             if (sequence != null) {
-                // Pour un caractère accentué, ajouter chaque frappe séparément
+                // Pour un caractère nécessitant une séquence de touches
                 for (char keystroke : sequence.toCharArray()) {
                     keyStrokes.add(String.valueOf(keystroke));
                 }
@@ -92,20 +140,20 @@ public class AccentAnalyzer {
     }
 
     /**
-     * Vérifie si un caractère est accentué.
+     * Vérifie si un caractère nécessite une séquence de touches spéciale.
      * @param c Le caractère à vérifier
-     * @return true si le caractère est accentué, false sinon
+     * @return true si le caractère nécessite une séquence spéciale, false sinon
      */
-    public boolean isAccented(char c) {
-        return accentSequences.containsKey(c);
+    public boolean needsSpecialSequence(char c) {
+        return keySequences.containsKey(c);
     }
 
     /**
-     * Retourne la séquence de touches pour un caractère accentué.
-     * @param c Le caractère accentué
-     * @return La séquence de touches ou null si le caractère n'est pas accentué
+     * Retourne la séquence de touches pour un caractère.
+     * @param c Le caractère
+     * @return La séquence de touches ou null si le caractère n'a pas de séquence spéciale
      */
     public String getKeySequence(char c) {
-        return accentSequences.get(c);
+        return keySequences.get(c);
     }
 }

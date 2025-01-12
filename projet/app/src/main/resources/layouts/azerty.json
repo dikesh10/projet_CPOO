@@ -1,13 +1,18 @@
 {
   "name": "AZERTY",
-  "description": "Standard French AZERTY layout",
+  "description": "Standard French AZERTY layout with all special characters and key sequences",
   "keys": {
     "a": {
       "row": 2,
       "column": 0,
       "finger": "LEFT_PINKY",
       "shiftProduces": "A",
-      "altgrProduces": null
+      "altgrProduces": null,
+      "accentSequences": {
+        "â": "^a",
+        "à": "`a",
+        "á": "´a"
+      }
     },
     "z": {
       "row": 2,
@@ -21,7 +26,13 @@
       "column": 2,
       "finger": "LEFT_MIDDLE",
       "shiftProduces": "E",
-      "altgrProduces": "€"
+      "altgrProduces": "€",
+      "accentSequences": {
+        "é": "´e",
+        "è": "`e",
+        "ê": "^e",
+        "ë": "¨e"
+      }
     },
     "r": {
       "row": 2,
@@ -42,28 +53,44 @@
       "column": 5,
       "finger": "RIGHT_INDEX",
       "shiftProduces": "Y",
-      "altgrProduces": null
+      "altgrProduces": null,
+      "accentSequences": {
+        "ÿ": "¨y"
+      }
     },
     "u": {
       "row": 2,
       "column": 6,
       "finger": "RIGHT_INDEX",
       "shiftProduces": "U",
-      "altgrProduces": null
+      "altgrProduces": null,
+      "accentSequences": {
+        "û": "^u",
+        "ù": "`u",
+        "ü": "¨u"
+      }
     },
     "i": {
       "row": 2,
       "column": 7,
       "finger": "RIGHT_MIDDLE",
       "shiftProduces": "I",
-      "altgrProduces": null
+      "altgrProduces": null,
+      "accentSequences": {
+        "î": "^i",
+        "ï": "¨i"
+      }
     },
     "o": {
       "row": 2,
       "column": 8,
       "finger": "RIGHT_RING",
       "shiftProduces": "O",
-      "altgrProduces": null
+      "altgrProduces": null,
+      "accentSequences": {
+        "ô": "^o",
+        "ö": "¨o"
+      }
     },
     "p": {
       "row": 2,
@@ -161,7 +188,10 @@
       "column": 3,
       "finger": "LEFT_INDEX",
       "shiftProduces": "C",
-      "altgrProduces": null
+      "altgrProduces": null,
+      "accentSequences": {
+        "ç": "c,"
+      }
     },
     "v": {
       "row": 3,
@@ -173,7 +203,7 @@
     "b": {
       "row": 3,
       "column": 5,
-      "finger": "RIGHT_INDEX",
+      "finger": "LEFT_INDEX",
       "shiftProduces": "B",
       "altgrProduces": null
     },
@@ -183,6 +213,168 @@
       "finger": "RIGHT_INDEX",
       "shiftProduces": "N",
       "altgrProduces": null
+    },
+    "&": {
+      "row": 0,
+      "column": 0,
+      "finger": "LEFT_PINKY",
+      "shiftProduces": "1",
+      "altgrProduces": null
+    },
+    "é": {
+      "row": 0,
+      "column": 1,
+      "finger": "LEFT_RING",
+      "shiftProduces": "2",
+      "altgrProduces": "~"
+    },
+    "\"": {
+      "row": 0,
+      "column": 2,
+      "finger": "LEFT_MIDDLE",
+      "shiftProduces": "3",
+      "altgrProduces": "#"
+    },
+    "'": {
+      "row": 0,
+      "column": 3,
+      "finger": "LEFT_INDEX",
+      "shiftProduces": "4",
+      "altgrProduces": "{"
+    },
+    "(": {
+      "row": 0,
+      "column": 4,
+      "finger": "LEFT_INDEX",
+      "shiftProduces": "5",
+      "altgrProduces": "["
+    },
+    "-": {
+      "row": 0,
+      "column": 5,
+      "finger": "LEFT_INDEX",
+      "shiftProduces": "6",
+      "altgrProduces": "|"
+    },
+    "è": {
+      "row": 0,
+      "column": 6,
+      "finger": "RIGHT_INDEX",
+      "shiftProduces": "7",
+      "altgrProduces": "`"
+    },
+    "_": {
+      "row": 0,
+      "column": 7,
+      "finger": "RIGHT_MIDDLE",
+      "shiftProduces": "8",
+      "altgrProduces": "\\"
+    },
+    "ç": {
+      "row": 0,
+      "column": 8,
+      "finger": "RIGHT_RING",
+      "shiftProduces": "9",
+      "altgrProduces": "^"
+    },
+    "à": {
+      "row": 0,
+      "column": 9,
+      "finger": "RIGHT_PINKY",
+      "shiftProduces": "0",
+      "altgrProduces": "@"
+    },
+    ")": {
+      "row": 0,
+      "column": 10,
+      "finger": "RIGHT_PINKY",
+      "shiftProduces": "°",
+      "altgrProduces": "]"
+    },
+    "=": {
+      "row": 0,
+      "column": 11,
+      "finger": "RIGHT_PINKY",
+      "shiftProduces": "+",
+      "altgrProduces": "}"
+    },
+    "^": {
+      "row": 0,
+      "column": 12,
+      "finger": "RIGHT_PINKY",
+      "isDeadKey": true,
+      "shiftProduces": "¨",
+      "altgrProduces": null
+    },
+    "$": {
+      "row": 0,
+      "column": 13,
+      "finger": "RIGHT_PINKY",
+      "shiftProduces": "£",
+      "altgrProduces": "¤"
+    },
+    "!": {
+      "row": 1,
+      "column": 10,
+      "finger": "RIGHT_PINKY",
+      "shiftProduces": "§",
+      "altgrProduces": null
+    },
+    ":": {
+      "row": 1,
+      "column": 11,
+      "finger": "RIGHT_PINKY",
+      "shiftProduces": "/",
+      "altgrProduces": null
+    },
+    ";": {
+      "row": 1,
+      "column": 12,
+      "finger": "RIGHT_PINKY",
+      "shiftProduces": ".",
+      "altgrProduces": null
+    },
+    ",": {
+      "row": 1,
+      "column": 13,
+      "finger": "RIGHT_PINKY",
+      "shiftProduces": "<",
+      "altgrProduces": null
+    },
+    ".": {
+      "row": 1,
+      "column": 14,
+      "finger": "RIGHT_PINKY",
+      "shiftProduces": ">",
+      "altgrProduces": null
+    },
+    "/": {
+      "row": 1,
+      "column": 15,
+      "finger": "RIGHT_PINKY",
+      "shiftProduces": "?",
+      "altgrProduces": null
+    }
+  },
+  "modifierKeys": {
+    "shift": {
+      "left": {
+        "row": 3,
+        "column": -1,
+        "finger": "LEFT_PINKY"
+      },
+      "right": {
+        "row": 3,
+        "column": 13,
+        "finger": "RIGHT_PINKY"
+      }
+    },
+    "altgr": {
+      "right": {
+        "row": 4,
+        "column": 2,
+        "finger": "RIGHT_THUMB"
+      }
     }
   }
 }
