@@ -2,10 +2,13 @@ package org.projet.analyzer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Map;
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Tests unitaires pour la classe TextAnalyzer.
@@ -18,11 +21,16 @@ public class TextAnalyzerTest {
         analyzer = new TextAnalyzer();
     }
 
+    @AfterEach
+    void tearDown() {
+        analyzer.shutdown();
+    }
+
     @Test
     @DisplayName("Test de l'analyse des caractères individuels")
     void testAnalyzeSimpleText() {
         String text = "hello";
-        analyzer.analyzeText(text, 1);
+        analyzer.analyzeText(text);
         
         // Vérifier les fréquences individuelles
         assertEquals(1L, analyzer.getFrequency("h"));
@@ -38,7 +46,7 @@ public class TextAnalyzerTest {
     @DisplayName("Test de l'analyse des bigrammes")
     void testAnalyzeBigrams() {
         String text = "hello";
-        analyzer.analyzeText(text, 2);
+        analyzer.analyzeText(text);
         
         // Vérifier les bigrammes
         assertEquals(1L, analyzer.getFrequency("he"));
@@ -54,7 +62,7 @@ public class TextAnalyzerTest {
     @DisplayName("Test de l'analyse des trigrammes")
     void testAnalyzeTrigrams() {
         String text = "hello";
-        analyzer.analyzeText(text, 3);
+        analyzer.analyzeText(text);
         
         // Vérifier les trigrammes
         assertEquals(1L, analyzer.getFrequency("hel"));
@@ -66,69 +74,79 @@ public class TextAnalyzerTest {
     }
 
     @Test
-    @DisplayName("Test des valeurs invalides de N")
-    void testInvalidNValue() {
-        // Tester les valeurs invalides de N
-        assertThrows(IllegalArgumentException.class, () -> 
-            analyzer.analyzeText("test", 0));
-            
-        assertThrows(IllegalArgumentException.class, () -> 
-            analyzer.analyzeText("test", 4));
-    }
-
-    @Test
     @DisplayName("Test avec un texte vide")
     void testEmptyText() {
-        analyzer.analyzeText("", 1);
+        analyzer.analyzeText("");
         
         // Vérifier que le texte vide est géré correctement
         assertEquals(0L, analyzer.getTotalCharacters());
-        assertTrue(analyzer.getAllFrequencies().isEmpty());
+        assertEquals(0L, analyzer.getFrequency("a")); // N'importe quel caractère devrait retourner 0
     }
 
     @Test
     @DisplayName("Test avec plusieurs analyses successives")
     void testMultipleAnalysis() {
         // Analyser deux textes successivement
-        analyzer.analyzeText("hello", 1);
-        analyzer.analyzeText("world", 1);
+        analyzer.analyzeTexts(Arrays.asList("hello", "world"));
         
         // Vérifier le total des caractères
         assertEquals(10L, analyzer.getTotalCharacters());
         
         // Vérifier les fréquences individuelles
-        Map<String, Long> frequencies = analyzer.getAllFrequencies();
-        assertEquals(7, frequencies.size()); // h,e,l,o,w,r,d (l et o apparaissent deux fois)
-        
-        // Vérifier chaque fréquence
-        assertEquals(1L, frequencies.get("h"));
-        assertEquals(1L, frequencies.get("e"));
-        assertEquals(3L, frequencies.get("l"));
-        assertEquals(2L, frequencies.get("o"));
-        assertEquals(1L, frequencies.get("w"));
-        assertEquals(1L, frequencies.get("r"));
-        assertEquals(1L, frequencies.get("d"));
+        assertEquals(1L, analyzer.getFrequency("h"));
+        assertEquals(1L, analyzer.getFrequency("e"));
+        assertEquals(3L, analyzer.getFrequency("l"));
+        assertEquals(2L, analyzer.getFrequency("o"));
+        assertEquals(1L, analyzer.getFrequency("w"));
+        assertEquals(1L, analyzer.getFrequency("r"));
+        assertEquals(1L, analyzer.getFrequency("d"));
         
         // Vérifier qu'un caractère inexistant retourne 0
         assertEquals(0L, analyzer.getFrequency("x"));
     }
 
     @Test
-    @DisplayName("Test de getAllFrequencies")
-    void testGetAllFrequencies() {
+    @DisplayName("Test du traitement parallèle")
+    void testParallelProcessing() {
+        // Créer une liste de textes à analyser en parallèle
+        var texts = Arrays.asList(
+            "hello",      // 5 caractères
+            "world",      // 5 caractères
+            "test",       // 4 caractères
+            "parallel",   // 8 caractères
+            "processing" // 10 caractères
+        );
+        
+        analyzer.analyzeTexts(texts);
+        
+        // Vérifier le total des caractères (5 + 5 + 4 + 8 + 10 = 32)
+        assertEquals(32L, analyzer.getTotalCharacters());
+        
+        // Vérifier les caractères qui apparaissent un nombre spécifique de fois
+        assertTrue(analyzer.getFrequency("h") == 1L); // uniquement dans "hello"
+        assertTrue(analyzer.getFrequency("w") == 1L); // uniquement dans "world"
+        assertTrue(analyzer.getFrequency("t") >= 2L); // dans "test" et peut-être ailleurs
+        assertTrue(analyzer.getFrequency("l") >= 3L); // dans "hello", "parallel"
+        assertTrue(analyzer.getFrequency("e") >= 2L); // dans "hello", "test"
+        assertTrue(analyzer.getFrequency("s") >= 2L); // dans "test", "processing"
+        
+        // Vérifier que des caractères inexistants retournent 0
+        assertEquals(0L, analyzer.getFrequency("x"));
+        assertEquals(0L, analyzer.getFrequency("y"));
+        assertEquals(0L, analyzer.getFrequency("z"));
+    }
+
+    @Test
+    @DisplayName("Test des pourcentages")
+    void testPercentages() {
         String text = "hello";
-        analyzer.analyzeText(text, 1);
+        analyzer.analyzeText(text);
         
-        // Vérifier que la map retournée est non modifiable
-        Map<String, Long> frequencies = analyzer.getAllFrequencies();
-        assertThrows(UnsupportedOperationException.class, () -> 
-            frequencies.put("x", 1L));
-        
-        // Vérifier que toutes les fréquences sont présentes
-        assertEquals(4, frequencies.size()); // h,e,l,o (l apparaît deux fois)
-        assertTrue(frequencies.containsKey("h"));
-        assertTrue(frequencies.containsKey("e"));
-        assertTrue(frequencies.containsKey("l"));
-        assertTrue(frequencies.containsKey("o"));
+        // Vérifier les pourcentages
+        assertEquals(20.0, analyzer.getPercentage("h")); // 1/5 = 20%
+        assertEquals(20.0, analyzer.getPercentage("e")); // 1/5 = 20%
+        assertEquals(40.0, analyzer.getPercentage("l")); // 2/5 = 40%
+        assertEquals(20.0, analyzer.getPercentage("o")); // 1/5 = 20%
+        assertEquals(0.0, analyzer.getPercentage("x")); // caractère inexistant
     }
 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -28,6 +29,32 @@ public class TextLoader {
         accentAnalyzer.analyzeAccentedText(content);
     }
     
+    /**
+     * Loads all text files from a directory.
+     * 
+     * @param directory The directory containing text files
+     * @return A list of contents of text files
+     * @throws IOException if the directory cannot be read
+     */
+    public static List<String> loadFromDirectory(Path directory) throws IOException {
+        try (Stream<Path> paths = Files.walk(directory)) {
+            return paths
+                .filter(Files::isRegularFile)
+                .filter(path -> path.toString().endsWith(".txt"))
+                .parallel()
+                .map(path -> {
+                    try {
+                        return Files.readString(path);
+                    } catch (IOException e) {
+                        System.err.println("Erreur lors de la lecture de " + path + ": " + e.getMessage());
+                        return "";
+                    }
+                })
+                .filter(content -> !content.isEmpty())
+                .collect(Collectors.toList());
+        }
+    }
+
     /**
      * Loads and analyzes all text files in a directory.
      * @param analyzer The text analyzer to use

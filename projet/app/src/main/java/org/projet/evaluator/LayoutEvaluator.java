@@ -101,7 +101,7 @@ public class LayoutEvaluator {
             else if (ngram.length() == 1) {
                 // Mettre à jour les charges des doigts
                 char c = ngram.charAt(0);
-                KeyboardLayout.Key key = layout.characterToKeyMap().get(c);
+                KeyboardLayout.Key key = getKeyForCharacter(layout, c);
                 if (key != null) {
                     fingerLoads.merge(key.finger(), 
                         (frequency * 100.0) / ngramFrequencies.values().stream().mapToLong(Long::longValue).sum(),
@@ -113,14 +113,32 @@ public class LayoutEvaluator {
         return score;
     }
     
+    private KeyboardLayout.Key getKeyForCharacter(KeyboardLayout layout, char c) {
+        // Gérer les caractères spéciaux
+        switch (c) {
+            case '`':  // accent grave
+                return layout.characterToKeyMap().get('7');  // Sur AZERTY, l'accent grave est sur la touche 7
+            case '^':  // accent circonflexe
+                return layout.characterToKeyMap().get('9');  // Sur AZERTY, l'accent circonflexe est sur la touche 9
+            case '¨':  // tréma
+                return layout.characterToKeyMap().get('¨');  // Sur AZERTY, le tréma est une touche morte
+            case '´':  // accent aigu
+                return layout.characterToKeyMap().get('é');  // Sur AZERTY, l'accent aigu est sur la touche é
+            case '⇧':  // touche Shift
+                return new KeyboardLayout.Key(0, 0, KeyboardLayout.Finger.LEFT_PINKY, '⇧', '⇧');  // Position approximative de Shift
+            default:
+                return layout.characterToKeyMap().get(c);
+        }
+    }
+    
     private double evaluateBigram(KeyboardLayout layout, String bigram, long frequency) {
         if (bigram.length() != 2) return 0.0;
         
         char c1 = bigram.charAt(0);
         char c2 = bigram.charAt(1);
         
-        KeyboardLayout.Key key1 = layout.characterToKeyMap().get(c1);
-        KeyboardLayout.Key key2 = layout.characterToKeyMap().get(c2);
+        KeyboardLayout.Key key1 = getKeyForCharacter(layout, c1);
+        KeyboardLayout.Key key2 = getKeyForCharacter(layout, c2);
         
         if (key1 == null || key2 == null) return 0.0;
         
@@ -162,9 +180,9 @@ public class LayoutEvaluator {
         char c2 = trigram.charAt(1);
         char c3 = trigram.charAt(2);
         
-        KeyboardLayout.Key key1 = layout.characterToKeyMap().get(c1);
-        KeyboardLayout.Key key2 = layout.characterToKeyMap().get(c2);
-        KeyboardLayout.Key key3 = layout.characterToKeyMap().get(c3);
+        KeyboardLayout.Key key1 = getKeyForCharacter(layout, c1);
+        KeyboardLayout.Key key2 = getKeyForCharacter(layout, c2);
+        KeyboardLayout.Key key3 = getKeyForCharacter(layout, c3);
         
         if (key1 == null || key2 == null || key3 == null) return 0.0;
         

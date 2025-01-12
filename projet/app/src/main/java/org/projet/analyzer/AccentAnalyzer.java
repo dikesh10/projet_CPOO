@@ -37,7 +37,7 @@ public class AccentAnalyzer {
         keySequences.put('ú', "´u");
 
         // Accents graves
-        keySequences.put('à', "`a");
+        keySequences.put('à', "`a");  // Séquence accent grave + a
         keySequences.put('è', "`e");
         keySequences.put('ì', "`i");
         keySequences.put('ò', "`o");
@@ -121,22 +121,8 @@ public class AccentAnalyzer {
             }
         }
         
-        // Analyser les caractères individuels (unigrammes)
-        for (String keystroke : keyStrokes) {
-            textAnalyzer.analyzeText(keystroke, 1);
-        }
-        
-        // Analyser les séquences de frappes deux par deux (bigrammes)
-        for (int i = 0; i < keyStrokes.size() - 1; i++) {
-            String bigramme = keyStrokes.get(i) + keyStrokes.get(i + 1);
-            textAnalyzer.analyzeText(bigramme, 2);
-        }
-        
-        // Analyser les séquences de frappes trois par trois (trigrammes)
-        for (int i = 0; i < keyStrokes.size() - 2; i++) {
-            String trigramme = keyStrokes.get(i) + keyStrokes.get(i + 1) + keyStrokes.get(i + 2);
-            textAnalyzer.analyzeText(trigramme, 3);
-        }
+        // Analyser la séquence de touches avec TextAnalyzer
+        textAnalyzer.analyzeKeyStrokes(keyStrokes);
     }
 
     /**

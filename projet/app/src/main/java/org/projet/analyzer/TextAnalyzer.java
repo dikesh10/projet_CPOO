@@ -1,8 +1,11 @@
 package org.projet.analyzer;
 
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -18,127 +21,157 @@ import java.util.stream.Collectors;
  * analyzer.analyzeText("texte");
  * 
  * // Obtenir les fréquences
- * Map<String, Long> charFreq = analyzer.getFrequency("a");
- * Map<String, Long> bigramFreq = analyzer.getFrequency("ab");
- * Map<String, Long> trigramFreq = analyzer.getFrequency("abc");
+ * long charFreq = analyzer.getFrequency("a");
+ * long bigramFreq = analyzer.getFrequency("ab");
+ * long trigramFreq = analyzer.getFrequency("abc");
  * }</pre>
  * 
  * @see TextLoader
  */
 public class TextAnalyzer {
-    private final Map<String, Long> ngramFrequencies;
-    private long totalCharacters;
+    private final AnalysisResult result;
+    private final ExecutorService executor;
 
     /**
      * Constructeur initialisant les structures de données pour l'analyse.
      */
     public TextAnalyzer() {
-        this.ngramFrequencies = new HashMap<>();
-        this.totalCharacters = 0;
+        this.result = new AnalysisResult();
+        this.executor = Executors.newFixedThreadPool(
+            Runtime.getRuntime().availableProcessors()
+        );
     }
 
     /**
-     * Analyse un texte donné et met à jour les statistiques.
+     * Analyse un texte donné et met à jour les statistiques de manière thread-safe.
      * 
      * @param text Le texte à analyser
-     * @param n La longueur des n-grammes à analyser (1, 2 ou 3)
      */
-    public void analyzeText(String text, int n) {
-        if (n < 1 || n > 3) {
-            throw new IllegalArgumentException("N doit être compris entre 1 et 3");
+    public void analyzeText(String text) {
+        // Créer un AccentAnalyzer pour convertir les caractères accentués
+        AccentAnalyzer accentAnalyzer = new AccentAnalyzer(this);
+        accentAnalyzer.analyzeAccentedText(text);
+    }
+
+    /**
+     * Analyse une séquence de touches individuelles.
+     * Cette méthode est utilisée en interne par AccentAnalyzer.
+     */
+    void analyzeKeyStrokes(List<String> keyStrokes) {
+        // Réinitialiser le compteur de caractères
+        result.resetTotalCharacters();
+        result.setTotalCharacters(keyStrokes.size());
+        
+        // Analyse des caractères individuels
+        for (String keystroke : keyStrokes) {
+            result.incrementNGramCount(keystroke);
         }
-        
-        totalCharacters += text.length();
-        
-        // Analyser chaque n-gramme possible dans le texte
-        for (int i = 0; i <= text.length() - n; i++) {
-            String ngram = text.substring(i, i + n);
-            ngramFrequencies.merge(ngram, 1L, Long::sum);
+
+        // Analyse des bigrammes
+        StringBuilder bigramBuilder = new StringBuilder();
+        for (int i = 0; i < keyStrokes.size() - 1; i++) {
+            bigramBuilder.setLength(0);
+            bigramBuilder.append(keyStrokes.get(i)).append(keyStrokes.get(i + 1));
+            result.incrementNGramCount(bigramBuilder.toString());
+        }
+
+        // Analyse des trigrammes
+        StringBuilder trigramBuilder = new StringBuilder();
+        for (int i = 0; i < keyStrokes.size() - 2; i++) {
+            trigramBuilder.setLength(0);
+            trigramBuilder.append(keyStrokes.get(i))
+                         .append(keyStrokes.get(i + 1))
+                         .append(keyStrokes.get(i + 2));
+            result.incrementNGramCount(trigramBuilder.toString());
         }
     }
 
     /**
-     * Calcule le pourcentage d'occurrence d'un n-gramme.
+     * Analyse une liste de textes en parallèle.
      * 
-     * @param frequency La fréquence brute du n-gramme
-     * @return Le pourcentage d'occurrence (entre 0 et 100)
+     * @param texts Liste des textes à analyser
      */
-    private double calculatePercentage(long frequency) {
-        if (totalCharacters == 0) return 0.0;
-        return (frequency * 100.0) / totalCharacters;
+    public void analyzeTexts(List<String> texts) {
+        try {
+            List<Future<?>> futures = texts.stream()
+                .map(text -> executor.submit(() -> analyzeText(text)))
+                .collect(Collectors.toList());
+
+            // Attendre que toutes les tâches soient terminées
+            for (Future<?> future : futures) {
+                future.get();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de l'analyse parallèle", e);
+        }
     }
 
     /**
-     * Affiche les statistiques d'analyse.
-     * Montre les N n-grammes les plus fréquents pour chaque longueur.
-     */
-    public void displayResults() {
-        System.out.println("\n=== Analyse de texte ===");
-        System.out.println("Nombre total de caractères : " + totalCharacters);
-        
-        // Trier les n-grammes par longueur
-        Map<Integer, Map<String, Long>> ngramsByLength = ngramFrequencies.entrySet().stream()
-            .collect(Collectors.groupingBy(
-                e -> e.getKey().length(),
-                Collectors.toMap(
-                    Map.Entry::getKey,
-                    Map.Entry::getValue,
-                    Long::sum,
-                    TreeMap::new
-                )
-            ));
-        
-        // Afficher les résultats pour chaque longueur de n-gramme
-        ngramsByLength.forEach((length, frequencies) -> {
-            String title = switch (length) {
-                case 1 -> "Fréquence des caractères";
-                case 2 -> "Fréquence des bigrammes";
-                case 3 -> "Fréquence des trigrammes";
-                default -> "Fréquence des " + length + "-grammes";
-            };
-            
-            System.out.println("\n=== " + title + " ===");
-            
-            // Trier par fréquence décroissante et afficher les 10 premiers
-            frequencies.entrySet().stream()
-                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-                .limit(10)
-                .forEach(entry -> {
-                    double percentage = calculatePercentage(entry.getValue());
-                    System.out.printf("'%s' : %d (%.2f%%)\n",
-                        entry.getKey(),
-                        entry.getValue(),
-                        percentage);
-                });
-        });
-        System.out.println("\n===================");
-    }
-
-    /**
-     * Retourne la fréquence d'un n-gramme spécifique.
+     * Obtient la fréquence d'un n-gramme.
      * 
-     * @param ngram L'n-gramme dont on veut connaître la fréquence
-     * @return La fréquence de l'n-gramme (nombre d'occurrences)
+     * @param ngram Le n-gramme dont on veut la fréquence
+     * @return La fréquence du n-gramme
      */
     public long getFrequency(String ngram) {
-        return ngramFrequencies.getOrDefault(ngram, 0L);
+        return result.getNGramCount(ngram);
     }
 
     /**
-     * Retourne toutes les fréquences de n-grammes.
+     * Obtient le pourcentage d'apparition d'un n-gramme.
      * 
-     * @return Une vue non modifiable des fréquences de n-grammes
+     * @param ngram Le n-gramme dont on veut le pourcentage
+     * @return Le pourcentage d'apparition du n-gramme
      */
-    public Map<String, Long> getAllFrequencies() {
-        return Map.copyOf(ngramFrequencies);
+    public double getPercentage(String ngram) {
+        long total = result.getTotalCharacters();
+        if (total == 0) return 0.0;
+        return (getFrequency(ngram) * 100.0) / total;
     }
 
     /**
-     * Retourne le nombre total de caractères analysés.
+     * Obtient le nombre total de caractères analysés.
      * 
      * @return Le nombre total de caractères
      */
     public long getTotalCharacters() {
-        return totalCharacters;
+        return result.getTotalCharacters();
+    }
+
+    /**
+     * Obtient toutes les fréquences des n-grammes.
+     * @return Une Map contenant les n-grammes et leurs fréquences
+     */
+    public Map<String, Long> getAllFrequencies() {
+        return result.getNGramFrequencies();
+    }
+
+    /**
+     * Réinitialise le compteur total de caractères.
+     */
+    public void resetTotalCharacters() {
+        result.resetTotalCharacters();
+    }
+
+    /**
+     * Définit le nombre total de caractères.
+     * @param count Le nouveau nombre total de caractères
+     */
+    public void setTotalCharacters(long count) {
+        result.setTotalCharacters(count);
+    }
+
+    /**
+     * Ferme l'ExecutorService et libère les ressources.
+     */
+    public void shutdown() {
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 }
