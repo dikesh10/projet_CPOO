@@ -7,12 +7,7 @@
       "column": 0,
       "finger": "LEFT_PINKY",
       "shiftProduces": "A",
-      "altgrProduces": null,
-      "accentSequences": {
-        "â": "^a",
-        "à": "`a",
-        "á": "´a"
-      }
+      "altgrProduces": null
     },
     "z": {
       "row": 2,
@@ -26,13 +21,7 @@
       "column": 2,
       "finger": "LEFT_MIDDLE",
       "shiftProduces": "E",
-      "altgrProduces": "€",
-      "accentSequences": {
-        "é": "´e",
-        "è": "`e",
-        "ê": "^e",
-        "ë": "¨e"
-      }
+      "altgrProduces": "€"
     },
     "r": {
       "row": 2,
@@ -53,44 +42,28 @@
       "column": 5,
       "finger": "RIGHT_INDEX",
       "shiftProduces": "Y",
-      "altgrProduces": null,
-      "accentSequences": {
-        "ÿ": "¨y"
-      }
+      "altgrProduces": null
     },
     "u": {
       "row": 2,
       "column": 6,
       "finger": "RIGHT_INDEX",
       "shiftProduces": "U",
-      "altgrProduces": null,
-      "accentSequences": {
-        "û": "^u",
-        "ù": "`u",
-        "ü": "¨u"
-      }
+      "altgrProduces": null
     },
     "i": {
       "row": 2,
       "column": 7,
       "finger": "RIGHT_MIDDLE",
       "shiftProduces": "I",
-      "altgrProduces": null,
-      "accentSequences": {
-        "î": "^i",
-        "ï": "¨i"
-      }
+      "altgrProduces": null
     },
     "o": {
       "row": 2,
       "column": 8,
       "finger": "RIGHT_RING",
       "shiftProduces": "O",
-      "altgrProduces": null,
-      "accentSequences": {
-        "ô": "^o",
-        "ö": "¨o"
-      }
+      "altgrProduces": null
     },
     "p": {
       "row": 2,
@@ -188,10 +161,7 @@
       "column": 3,
       "finger": "LEFT_INDEX",
       "shiftProduces": "C",
-      "altgrProduces": null,
-      "accentSequences": {
-        "ç": "c,"
-      }
+      "altgrProduces": null
     },
     "v": {
       "row": 3,
@@ -302,7 +272,6 @@
       "row": 0,
       "column": 12,
       "finger": "RIGHT_PINKY",
-      "isDeadKey": true,
       "shiftProduces": "¨",
       "altgrProduces": null
     },
@@ -354,27 +323,6 @@
       "finger": "RIGHT_PINKY",
       "shiftProduces": "?",
       "altgrProduces": null
-    }
-  },
-  "modifierKeys": {
-    "shift": {
-      "left": {
-        "row": 3,
-        "column": -1,
-        "finger": "LEFT_PINKY"
-      },
-      "right": {
-        "row": 3,
-        "column": 13,
-        "finger": "RIGHT_PINKY"
-      }
-    },
-    "altgr": {
-      "right": {
-        "row": 4,
-        "column": 2,
-        "finger": "RIGHT_THUMB"
-      }
     }
   }
 }

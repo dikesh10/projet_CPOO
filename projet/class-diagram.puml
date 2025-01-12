@@ -3,49 +3,83 @@
 package org.projet {
     class App {
         + main(args: String[]): void
+        - analyzeTexts(directory: Path): void
+        - evaluateLayout(layout: KeyboardLayout): void
+        - optimizeLayout(layout: KeyboardLayout): void
+        - displayResults(): void
     }
 }
 
 package org.projet.analyzer {
     class TextAnalyzer {
-        - nGramFrequencies: Map<String, Integer>
-        + analyzeText(text: String, n: int): void
-        + getFrequency(nGram: String): int
-        + getNGrams(): Set<String>
+        - characterFrequencies: Map<Character, Integer>
+        - bigramFrequencies: Map<String, Integer>
+        - trigramFrequencies: Map<String, Integer>
+        - totalCharacters: int
+        + analyzeText(text: String): void
+        + getCharacterFrequency(c: Character): int
+        + getBigramFrequency(bigram: String): int
+        + getTrigramFrequency(trigram: String): int
+        + getTotalCharacters(): int
+        + getCharacterPercentage(c: Character): double
+        + getBigramPercentage(bigram: String): double
+        + getTrigramPercentage(trigram: String): double
     }
 
     class TextLoader {
-        + loadText(path: Path): String
+        + {static} loadText(path: Path): String
         + {static} loadFromDirectory(dir: Path): List<String>
     }
 }
 
 package org.projet.config {
     class KeyboardConfigLoader {
-        + loadLayout(path: Path): KeyboardLayout
-        + loadGeometry(path: Path): KeyboardGeometry
+        - mapper: ObjectMapper
+        + loadLayout(configFile: Path): Optional<KeyboardLayout>
+    }
+
+    class KeyboardConfig {
+        - name: String
+        - description: String
+        - keys: Map<Character, KeyConfig>
+        + getName(): String
+        + getDescription(): String
+        + getKeys(): Map<Character, KeyConfig>
+    }
+
+    class KeyConfig {
+        - row: int
+        - column: int
+        - finger: String
+        - shiftProduces: String
+        - altgrProduces: String
+        + getRow(): int
+        + getColumn(): int
+        + getFinger(): String
+        + getShiftProduces(): String
+        + getAltgrProduces(): String
     }
 }
 
 package org.projet.model {
     class KeyboardLayout {
-        - layout: Map<Character, Key>
-        + getKey(c: Character): Key
-        + getKeys(): Set<Key>
-    }
-
-    class KeyboardGeometry {
-        - keyPositions: Map<Key, Position>
-        + getPosition(key: Key): Position
+        - name: String
+        - characterToKeyMap: Map<Character, Key>
+        + name(): String
+        + characterToKeyMap(): Map<Character, Key>
     }
 
     class Key {
         - row: int
-        - col: int
+        - column: int
         - finger: Finger
-        + getRow(): int
-        + getCol(): int
-        + getFinger(): Finger
+        - shiftProduces: Character
+        - altgrProduces: Character
+        + row(): int
+        + column(): int
+        + finger(): Finger
+        + shiftProduces(): Character
+        + altgrProduces(): Character
     }
 
     enum Finger {
@@ -58,30 +92,36 @@ package org.projet.model {
         RIGHT_RING
         RIGHT_PINKY
     }
+
+    enum Hand {
+        LEFT
+        RIGHT
+    }
 }
 
 package org.projet.evaluator {
-    interface LayoutEvaluator {
+    class LayoutEvaluator {
+        - textAnalyzer: TextAnalyzer
+        - weights: Map<String, Double>
         + evaluate(layout: KeyboardLayout): double
-    }
-
-    class MovementEvaluator {
-        - analyzer: TextAnalyzer
-        - geometry: KeyboardGeometry
-        + evaluate(layout: KeyboardLayout): double
-        - evaluateSameFinger(): double
-        - evaluateHandBalance(): double
-        - evaluateFingerBalance(): double
+        - evaluateBigrams(layout: KeyboardLayout): double
+        - evaluateTrigrams(layout: KeyboardLayout): double
+        - calculateFingerLoads(layout: KeyboardLayout): Map<Finger, Double>
+        - isSameFinger(key1: Key, key2: Key): boolean
+        - isLateralExtension(key1: Key, key2: Key): boolean
+        - isHandAlternation(key1: Key, key2: Key): boolean
+        - isInwardRoll(key1: Key, key2: Key): boolean
+        - isOutwardRoll(key1: Key, key2: Key): boolean
     }
 }
 
 package org.projet.optimizer {
     class KeyboardOptimizer {
         - evaluator: LayoutEvaluator
-        - population: List<KeyboardLayout>
-        + optimize(iterations: int): KeyboardLayout
-        - mutate(layout: KeyboardLayout): KeyboardLayout
-        - crossover(layout1: KeyboardLayout, layout2: KeyboardLayout): KeyboardLayout
+        - currentLayout: KeyboardLayout
+        + optimize(layout: KeyboardLayout): KeyboardLayout
+        - swapKeys(layout: KeyboardLayout, key1: Character, key2: Character): KeyboardLayout
+        - findBestSwap(layout: KeyboardLayout): Pair<Character, Character>
     }
 }
 
@@ -93,13 +133,15 @@ App --> KeyboardConfigLoader
 
 TextAnalyzer --> TextLoader
 
-MovementEvaluator ..|> LayoutEvaluator
-MovementEvaluator --> TextAnalyzer
-MovementEvaluator --> KeyboardGeometry
+KeyboardConfigLoader --> KeyboardConfig
+KeyboardConfig --> KeyConfig
+KeyboardConfig ..> KeyboardLayout
+
+KeyboardLayout --> Key
+Key --> Finger
+Finger --> Hand
 
 KeyboardOptimizer --> LayoutEvaluator
-KeyboardLayout --> Key
-KeyboardGeometry --> Key
-Key --> Finger
+LayoutEvaluator --> TextAnalyzer
 
 @enduml
