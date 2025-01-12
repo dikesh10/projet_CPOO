@@ -2,6 +2,8 @@ package org.projet.analyzer;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Classe pour analyser les caractères accentués et leurs séquences de touches.
@@ -53,23 +55,40 @@ public class AccentAnalyzer {
      * @param text Le texte à analyser
      */
     public void analyzeAccentedText(String text) {
-        StringBuilder keySequence = new StringBuilder();
+        List<String> keyStrokes = new ArrayList<>();
         
+        // Convertir le texte en séquence de frappes
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
             String sequence = accentSequences.get(c);
             
             if (sequence != null) {
-                // Si c'est un caractère accentué, ajouter sa séquence de touches
-                keySequence.append(sequence);
+                // Pour un caractère accentué, ajouter chaque frappe séparément
+                for (char keystroke : sequence.toCharArray()) {
+                    keyStrokes.add(String.valueOf(keystroke));
+                }
             } else {
-                // Sinon, ajouter le caractère tel quel
-                keySequence.append(c);
+                // Pour un caractère normal, l'ajouter tel quel
+                keyStrokes.add(String.valueOf(c));
             }
         }
         
-        // Analyser la séquence de touches comme des bigrammes
-        textAnalyzer.analyzeText(keySequence.toString(), 2);
+        // Analyser les caractères individuels (unigrammes)
+        for (String keystroke : keyStrokes) {
+            textAnalyzer.analyzeText(keystroke, 1);
+        }
+        
+        // Analyser les séquences de frappes deux par deux (bigrammes)
+        for (int i = 0; i < keyStrokes.size() - 1; i++) {
+            String bigramme = keyStrokes.get(i) + keyStrokes.get(i + 1);
+            textAnalyzer.analyzeText(bigramme, 2);
+        }
+        
+        // Analyser les séquences de frappes trois par trois (trigrammes)
+        for (int i = 0; i < keyStrokes.size() - 2; i++) {
+            String trigramme = keyStrokes.get(i) + keyStrokes.get(i + 1) + keyStrokes.get(i + 2);
+            textAnalyzer.analyzeText(trigramme, 3);
+        }
     }
 
     /**

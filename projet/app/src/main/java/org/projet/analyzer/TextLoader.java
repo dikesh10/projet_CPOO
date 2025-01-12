@@ -24,14 +24,8 @@ public class TextLoader {
         // Créer l'analyseur d'accents
         AccentAnalyzer accentAnalyzer = new AccentAnalyzer(analyzer);
         
-        // Analyser les caractères individuels
-        analyzer.analyzeText(content, 1);
-        
-        // Analyser les bigrammes en tenant compte des accents
+        // Analyser les caractères individuels et les séquences de touches
         accentAnalyzer.analyzeAccentedText(content);
-        
-        // Analyser les trigrammes
-        analyzer.analyzeText(content, 3);
     }
     
     /**
