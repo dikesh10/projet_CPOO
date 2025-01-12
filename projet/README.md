@@ -20,12 +20,7 @@ Ce projet est un outil d'analyse et d'optimisation de dispositions de clavier. I
   - Critères d'optimisation personnalisables
   - Conservation des meilleures dispositions trouvées
 
-## Installation
 
-### Prérequis
-
-- Java 21 ou supérieur
-- Gradle 8.0 ou supérieur
 
 ### Compilation
 
@@ -103,16 +98,3 @@ L'évaluateur de disposition (`LayoutEvaluator`) prend en compte plusieurs crit�
    - Répartition entre les mains
    - Charge de travail par doigt
 
-## Contribution
-
-Les contributions sont les bienvenues ! Voici comment contribuer :
-
-1. Forkez le projet
-2. Créez une branche pour votre fonctionnalité
-3. Committez vos changements
-4. Poussez vers la branche
-5. Ouvrez une Pull Request
-
-## Licence
-
-Ce projet est sous licence MIT. Voir le fichier LICENSE pour plus de détails.

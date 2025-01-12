@@ -57,9 +57,6 @@ public class KeyboardConfigLoader {
     /**
      * Saves a keyboard configuration to a JSON file.
      *
-     * @param layout the keyboard layout to save
-     * @param configFile the target JSON file
-     * @return true if saving was successful, false otherwise
      */
     public boolean saveLayout(KeyboardLayout layout, Path configFile) {
         try {

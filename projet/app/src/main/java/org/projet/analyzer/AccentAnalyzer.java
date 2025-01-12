@@ -100,7 +100,6 @@ public class AccentAnalyzer {
 
     /**
      * Analyse un texte en prenant en compte les séquences de touches pour les accents.
-     * @param text Le texte à analyser
      */
     public void analyzeAccentedText(String text) {
         List<String> keyStrokes = new ArrayList<>();
@@ -127,8 +126,6 @@ public class AccentAnalyzer {
 
     /**
      * Vérifie si un caractère nécessite une séquence de touches spéciale.
-     * @param c Le caractère à vérifier
-     * @return true si le caractère nécessite une séquence spéciale, false sinon
      */
     public boolean needsSpecialSequence(char c) {
         return keySequences.containsKey(c);
@@ -136,8 +133,6 @@ public class AccentAnalyzer {
 
     /**
      * Retourne la séquence de touches pour un caractère.
-     * @param c Le caractère
-     * @return La séquence de touches ou null si le caractère n'a pas de séquence spéciale
      */
     public String getKeySequence(char c) {
         return keySequences.get(c);

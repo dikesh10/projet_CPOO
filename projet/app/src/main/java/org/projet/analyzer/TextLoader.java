@@ -7,17 +7,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * Utility class to load and process text files.
- */
+
 public class TextLoader {
     
-    /**
-     * Loads and analyzes a single text file.
-     * @param analyzer The text analyzer to use
-     * @param filePath Path to the text file
-     * @throws IOException if the file cannot be read
-     */
+   
     public static void analyzeFile(TextAnalyzer analyzer, Path filePath) throws IOException {
         String content = Files.readString(filePath);
         System.out.println("Analyse du fichier : " + filePath.getFileName());
@@ -29,13 +22,7 @@ public class TextLoader {
         accentAnalyzer.analyzeAccentedText(content);
     }
     
-    /**
-     * Loads all text files from a directory.
-     * 
-     * @param directory The directory containing text files
-     * @return A list of contents of text files
-     * @throws IOException if the directory cannot be read
-     */
+   
     public static List<String> loadFromDirectory(Path directory) throws IOException {
         try (Stream<Path> paths = Files.walk(directory)) {
             return paths
@@ -55,12 +42,7 @@ public class TextLoader {
         }
     }
 
-    /**
-     * Loads and analyzes all text files in a directory.
-     * @param analyzer The text analyzer to use
-     * @param directoryPath Path to the directory containing text files
-     * @throws IOException if the directory cannot be read
-     */
+ 
     public static void analyzeDirectory(TextAnalyzer analyzer, Path directoryPath) throws IOException {
         try (Stream<Path> paths = Files.walk(directoryPath)) {
             paths.filter(Files::isRegularFile)

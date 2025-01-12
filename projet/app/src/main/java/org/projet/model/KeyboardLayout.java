@@ -31,7 +31,6 @@ public record KeyboardLayout(
 
     /**
      * Returns all keys in this layout.
-     * @return Map of characters to their corresponding keys
      */
     public Map<Character, Key> getKeys() {
         return characterToKeyMap;
@@ -39,8 +38,6 @@ public record KeyboardLayout(
 
     /**
      * Gets the key for a specific character.
-     * @param c The character to look up
-     * @return The key for the character, or null if not found
      */
     public Key getKey(char c) {
         return characterToKeyMap.get(c);

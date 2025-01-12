@@ -13,7 +13,6 @@ public record KeyPosition(
 ) {
     /**
      * Vérifie si la position est valide.
-     * @throws IllegalArgumentException si les paramètres sont invalides
      */
     public KeyPosition {
         if (row < 0 || row > 2) {

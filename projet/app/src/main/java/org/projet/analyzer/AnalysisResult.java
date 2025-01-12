@@ -33,7 +33,6 @@ public class AnalysisResult {
 
     /**
      * Définit le nombre total de caractères.
-     * @param count Le nouveau nombre total de caractères
      */
     public void setTotalCharacters(long count) {
         totalCharacters.set(count);

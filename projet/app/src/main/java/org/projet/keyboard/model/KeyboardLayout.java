@@ -15,8 +15,6 @@ public class KeyboardLayout {
 
     /**
      * Crée une nouvelle disposition de clavier.
-     * @param layout Map associant les caractères à leurs positions
-     * @param name Nom de la disposition (ex: "AZERTY", "QWERTY")
      */
     public KeyboardLayout(Map<Character, KeyPosition> layout, String name) {
         this.characterToPosition = Collections.unmodifiableMap(new HashMap<>(layout));
@@ -31,8 +29,6 @@ public class KeyboardLayout {
 
     /**
      * Retourne la position d'un caractère sur le clavier.
-     * @param c Le caractère à localiser
-     * @return La position du caractère, ou null si le caractère n'est pas dans la disposition
      */
     public KeyPosition getPosition(char c) {
         return characterToPosition.get(c);
@@ -40,8 +36,6 @@ public class KeyboardLayout {
 
     /**
      * Retourne le caractère à une position donnée.
-     * @param position La position à vérifier
-     * @return Le caractère à cette position, ou null si aucun caractère n'y est assigné
      */
     public Character getCharacter(KeyPosition position) {
         return positionToCharacter.get(position);
@@ -49,7 +43,6 @@ public class KeyboardLayout {
 
     /**
      * Retourne le nom de la disposition.
-     * @return Le nom de la disposition
      */
     public String getName() {
         return name;
@@ -57,7 +50,6 @@ public class KeyboardLayout {
 
     /**
      * Retourne toutes les positions de touches utilisées dans cette disposition.
-     * @return Une vue non modifiable des positions
      */
     public Map<Character, KeyPosition> getAllPositions() {
         return characterToPosition;

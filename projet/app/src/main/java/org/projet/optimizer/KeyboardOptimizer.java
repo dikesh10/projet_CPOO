@@ -116,7 +116,6 @@ public class KeyboardOptimizer {
                     newPopulation.set(i, mutate(newPopulation.get(i)));
                 }
             }
-            
             population = newPopulation;
         }
         

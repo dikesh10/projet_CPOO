@@ -4,14 +4,14 @@ package org.projet.keyboard.model;
  * Énumération des doigts utilisés pour la frappe.
  */
 public enum Finger {
-    PINKY_LEFT,    // Auriculaire gauche
-    RING_LEFT,     // Annulaire gauche
-    MIDDLE_LEFT,   // Majeur gauche
-    INDEX_LEFT,    // Index gauche
-    INDEX_RIGHT,   // Index droit
-    MIDDLE_RIGHT,  // Majeur droit
-    RING_RIGHT,    // Annulaire droit
-    PINKY_RIGHT;   // Auriculaire droit
+    PINKY_LEFT,   
+    RING_LEFT,     
+    MIDDLE_LEFT,   
+    INDEX_LEFT,    
+    INDEX_RIGHT,   
+    MIDDLE_RIGHT,  
+    RING_RIGHT,   
+    PINKY_RIGHT;  
 
     /**
      * Retourne la main à laquelle appartient le doigt.

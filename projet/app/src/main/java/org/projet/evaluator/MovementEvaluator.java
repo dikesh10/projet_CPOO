@@ -40,9 +40,6 @@ public class MovementEvaluator {
     /**
      * Vérifie si une touche est tapée avec le même doigt qu'une autre.
      * 
-     * @param key1 Première touche
-     * @param key2 Deuxième touche
-     * @return true si les deux touches utilisent le même doigt
      */
     public boolean isSameFinger(Key key1, Key key2) {
         return key1.finger() == key2.finger();
@@ -51,9 +48,6 @@ public class MovementEvaluator {
     /**
      * Vérifie si deux touches sont tapées avec la même main.
      * 
-     * @param key1 Première touche
-     * @param key2 Deuxième touche
-     * @return true si les deux touches sont tapées avec la même main
      */
     public boolean isSameHand(Key key1, Key key2) {
         return isLeftHand(key1.finger()) == isLeftHand(key2.finger());
@@ -62,8 +56,6 @@ public class MovementEvaluator {
     /**
      * Vérifie si un doigt est de la main gauche.
      * 
-     * @param finger Le doigt à vérifier
-     * @return true si le doigt appartient à la main gauche
      */
     public boolean isLeftHand(Finger finger) {
         return finger.name().startsWith("LEFT_");
@@ -74,9 +66,6 @@ public class MovementEvaluator {
      * Une extension latérale est considérée comme problématique car elle
      * nécessite un effort important du doigt.
      * 
-     * @param key1 Première touche
-     * @param key2 Deuxième touche
-     * @return true si le mouvement est une extension latérale
      */
     public boolean isLateralStretch(Key key1, Key key2) {
         if (!isSameHand(key1, key2)) return false;
@@ -90,9 +79,6 @@ public class MovementEvaluator {
      * Un roulement intérieur est un mouvement favorable où les doigts
      * se déplacent naturellement de l'extérieur vers l'intérieur de la main.
      * 
-     * @param key1 Première touche
-     * @param key2 Deuxième touche
-     * @return true si le mouvement est un roulement intérieur
      */
     public boolean isInwardRoll(Key key1, Key key2) {
         if (isSameHand(key1, key2)) {
@@ -110,9 +96,6 @@ public class MovementEvaluator {
      * Un mouvement en ciseaux se produit lorsque deux doigts adjacents
      * se croisent, ce qui est généralement inconfortable.
      * 
-     * @param key1 Première touche
-     * @param key2 Deuxième touche
-     * @return true si le mouvement est un mouvement de ciseaux
      */
     public boolean isScissors(Key key1, Key key2) {
         if (!isSameHand(key1, key2)) return false;
@@ -132,10 +115,6 @@ public class MovementEvaluator {
      * Une redirection se produit lorsque le mouvement change de direction
      * entre trois touches consécutives.
      * 
-     * @param key1 Première touche
-     * @param key2 Deuxième touche
-     * @param key3 Troisième touche
-     * @return true si le mouvement est une redirection
      */
     public boolean isRedirection(Key key1, Key key2, Key key3) {
         if (!isSameHand(key1, key2) || !isSameHand(key2, key3)) {
@@ -153,10 +132,6 @@ public class MovementEvaluator {
      * Une mauvaise redirection est une redirection qui implique
      * des mouvements latéraux importants.
      * 
-     * @param key1 Première touche
-     * @param key2 Deuxième touche
-     * @param key3 Troisième touche
-     * @return true si le mouvement est une mauvaise redirection
      */
     public boolean isBadRedirection(Key key1, Key key2, Key key3) {
         if (!isRedirection(key1, key2, key3)) {
@@ -172,9 +147,6 @@ public class MovementEvaluator {
     /**
      * Vérifie si un mouvement est un roulement vers l'extérieur.
      * 
-     * @param key1 Première touche
-     * @param key2 Deuxième touche
-     * @return true si le mouvement est un roulement vers l'extérieur
      */
     public boolean isOutwardRoll(Key key1, Key key2) {
         if (!isSameHand(key1, key2)) {
@@ -197,8 +169,6 @@ public class MovementEvaluator {
     /**
      * Retourne l'index d'un doigt (0 pour l'auriculaire, 3 pour l'index).
      * 
-     * @param finger Le doigt dont on veut l'index
-     * @return L'index du doigt (0-3)
      */
     private int getFingerIndex(Finger finger) {
         return switch (finger) {
@@ -212,9 +182,6 @@ public class MovementEvaluator {
     /**
      * Évalue le type de mouvement pour un bigramme donné.
      * 
-     * @param layout La disposition de clavier
-     * @param bigram Le bigramme à évaluer
-     * @return Le type de mouvement détecté, ou null si le bigramme ne peut pas être évalué
      */
     public MovementType evaluateBigramMovement(KeyboardLayout layout, String bigram) {
         if (bigram == null || bigram.length() != 2) {
