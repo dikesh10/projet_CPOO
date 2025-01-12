@@ -88,39 +88,52 @@ public class LayoutEvaluator {
      * Plus le score est bas, meilleure est la disposition.
      */
     public double evaluateLayout(KeyboardLayout layout) {
+        if (layout == null || layout.getKeys().isEmpty()) {
+            return 0.0;
+        }
+
         // Réinitialiser les compteurs
         movementCounts.clear();
         fingerLoads.clear();
+        
+        // Initialiser les compteurs à zéro
+        for (MovementType type : MovementType.values()) {
+            movementCounts.put(type, 0L);
+        }
         for (KeyboardLayout.Finger finger : KeyboardLayout.Finger.values()) {
             fingerLoads.put(finger, 0.0);
         }
+        
         totalBigramCount = 0;
         totalTrigramCount = 0;
         
         double score = 0.0;
         
-        // Évaluer les n-grammes
+        // Évaluer les bigrammes
         for (Map.Entry<String, Long> entry : ngramFrequencies.entrySet()) {
             String ngram = entry.getKey();
-            long frequency = entry.getValue();
-            
-            if (ngram.length() == 3) {
-                score += evaluateTrigram(layout, ngram, frequency);
-                totalTrigramCount += frequency;
-            }
-            else if (ngram.length() == 2) {
-                score += evaluateBigram(layout, ngram, frequency);
-                totalBigramCount += frequency;
-            }
-            else if (ngram.length() == 1) {
-                // Mettre à jour les charges des doigts
-                char c = ngram.charAt(0);
-                KeyboardLayout.Key key = getKeyForCharacter(layout, c);
-                if (key != null) {
-                    fingerLoads.merge(key.finger(), 
-                        (frequency * 100.0) / ngramFrequencies.values().stream().mapToLong(Long::longValue).sum(),
-                        Double::sum);
+            if (ngram.length() == 2) {
+                MovementType movement = movementEvaluator.evaluateBigramMovement(layout, ngram);
+                if (movement != null) {
+                    long count = entry.getValue();
+                    movementCounts.merge(movement, count, Long::sum);
+                    totalBigramCount += count;
+                    score += weights.get(movement) * count;
                 }
+            }
+        }
+
+        // Si aucun bigramme n'a été trouvé, retourner 0
+        if (totalBigramCount == 0) {
+            return 0.0;
+        }
+        
+        // Évaluer les trigrammes
+        for (Map.Entry<String, Long> entry : ngramFrequencies.entrySet()) {
+            String ngram = entry.getKey();
+            if (ngram.length() == 3) {
+                score += evaluateTrigram(layout, ngram, entry.getValue());
+                totalTrigramCount += entry.getValue();
             }
         }
         
@@ -146,48 +159,6 @@ public class LayoutEvaluator {
             default:
                 return layout.characterToKeyMap().get(c);
         }
-    }
-    
-    private double evaluateBigram(KeyboardLayout layout, String bigram, long frequency) {
-        if (bigram.length() != 2) return 0.0;
-        
-        char c1 = bigram.charAt(0);
-        char c2 = bigram.charAt(1);
-        
-        KeyboardLayout.Key key1 = getKeyForCharacter(layout, c1);
-        KeyboardLayout.Key key2 = getKeyForCharacter(layout, c2);
-        
-        if (key1 == null || key2 == null) return 0.0;
-        
-        double score = 0.0;
-        
-        // Vérifier les différents types de mouvements
-        if (movementEvaluator.isSameFinger(key1, key2)) {
-            score += weights.get(MovementType.SAME_FINGER);
-            movementCounts.merge(MovementType.SAME_FINGER, frequency, Long::sum);
-        }
-        
-        if (movementEvaluator.isLateralStretch(key1, key2)) {
-            score += weights.get(MovementType.LATERAL_STRETCH);
-            movementCounts.merge(MovementType.LATERAL_STRETCH, frequency, Long::sum);
-        }
-        
-        if (movementEvaluator.isScissors(key1, key2)) {
-            score += weights.get(MovementType.SCISSORS);
-            movementCounts.merge(MovementType.SCISSORS, frequency, Long::sum);
-        }
-        
-        if (!movementEvaluator.isSameHand(key1, key2)) {
-            score += weights.get(MovementType.HAND_ALTERNATION);
-            movementCounts.merge(MovementType.HAND_ALTERNATION, frequency, Long::sum);
-        }
-        
-        if (movementEvaluator.isInwardRoll(key1, key2)) {
-            score += weights.get(MovementType.INWARD_ROLL);
-            movementCounts.merge(MovementType.INWARD_ROLL, frequency, Long::sum);
-        }
-        
-        return score * frequency;
     }
     
     private double evaluateTrigram(KeyboardLayout layout, String trigram, long frequency) {

@@ -58,31 +58,32 @@ public class TextAnalyzer {
      * Cette méthode est utilisée en interne par AccentAnalyzer.
      */
     void analyzeKeyStrokes(List<String> keyStrokes) {
-        // Réinitialiser le compteur de caractères
-        result.resetTotalCharacters();
-        result.setTotalCharacters(keyStrokes.size());
+        // Update total characters without resetting
+        result.addToTotalCharacters(keyStrokes.size());
         
-        // Analyse des caractères individuels
-        for (String keystroke : keyStrokes) {
-            result.incrementNGramCount(keystroke);
-        }
+        // Analyse des caractères individuels de manière thread-safe
+        synchronized(result) {
+            for (String keystroke : keyStrokes) {
+                result.incrementNGramCount(keystroke);
+            }
 
-        // Analyse des bigrammes
-        StringBuilder bigramBuilder = new StringBuilder();
-        for (int i = 0; i < keyStrokes.size() - 1; i++) {
-            bigramBuilder.setLength(0);
-            bigramBuilder.append(keyStrokes.get(i)).append(keyStrokes.get(i + 1));
-            result.incrementNGramCount(bigramBuilder.toString());
-        }
+            // Analyse des bigrammes
+            StringBuilder bigramBuilder = new StringBuilder();
+            for (int i = 0; i < keyStrokes.size() - 1; i++) {
+                bigramBuilder.setLength(0);
+                bigramBuilder.append(keyStrokes.get(i)).append(keyStrokes.get(i + 1));
+                result.incrementNGramCount(bigramBuilder.toString());
+            }
 
-        // Analyse des trigrammes
-        StringBuilder trigramBuilder = new StringBuilder();
-        for (int i = 0; i < keyStrokes.size() - 2; i++) {
-            trigramBuilder.setLength(0);
-            trigramBuilder.append(keyStrokes.get(i))
-                         .append(keyStrokes.get(i + 1))
-                         .append(keyStrokes.get(i + 2));
-            result.incrementNGramCount(trigramBuilder.toString());
+            // Analyse des trigrammes
+            StringBuilder trigramBuilder = new StringBuilder();
+            for (int i = 0; i < keyStrokes.size() - 2; i++) {
+                trigramBuilder.setLength(0);
+                trigramBuilder.append(keyStrokes.get(i))
+                             .append(keyStrokes.get(i + 1))
+                             .append(keyStrokes.get(i + 2));
+                result.incrementNGramCount(trigramBuilder.toString());
+            }
         }
     }
 

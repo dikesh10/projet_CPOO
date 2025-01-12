@@ -1,5 +1,6 @@
 package org.projet.evaluator;
 
+import org.projet.model.KeyboardLayout;
 import org.projet.model.KeyboardLayout.Key;
 import org.projet.model.KeyboardLayout.Finger;
 
@@ -169,6 +170,31 @@ public class MovementEvaluator {
     }
     
     /**
+     * Vérifie si un mouvement est un roulement vers l'extérieur.
+     * 
+     * @param key1 Première touche
+     * @param key2 Deuxième touche
+     * @return true si le mouvement est un roulement vers l'extérieur
+     */
+    public boolean isOutwardRoll(Key key1, Key key2) {
+        if (!isSameHand(key1, key2)) {
+            return false;
+        }
+        
+        // Pour la main gauche : index -> majeur -> annulaire -> auriculaire
+        // Pour la main droite : index -> majeur -> annulaire -> auriculaire
+        return switch (key1.finger()) {
+            case LEFT_INDEX -> key2.finger() == Finger.LEFT_MIDDLE;
+            case LEFT_MIDDLE -> key2.finger() == Finger.LEFT_RING;
+            case LEFT_RING -> key2.finger() == Finger.LEFT_PINKY;
+            case RIGHT_INDEX -> key2.finger() == Finger.RIGHT_MIDDLE;
+            case RIGHT_MIDDLE -> key2.finger() == Finger.RIGHT_RING;
+            case RIGHT_RING -> key2.finger() == Finger.RIGHT_PINKY;
+            default -> false;
+        };
+    }
+    
+    /**
      * Retourne l'index d'un doigt (0 pour l'auriculaire, 3 pour l'index).
      * 
      * @param finger Le doigt dont on veut l'index
@@ -181,5 +207,53 @@ public class MovementEvaluator {
             case LEFT_MIDDLE, RIGHT_MIDDLE -> 2;
             case LEFT_INDEX, RIGHT_INDEX -> 3;
         };
+    }
+    
+    /**
+     * Évalue le type de mouvement pour un bigramme donné.
+     * 
+     * @param layout La disposition de clavier
+     * @param bigram Le bigramme à évaluer
+     * @return Le type de mouvement détecté, ou null si le bigramme ne peut pas être évalué
+     */
+    public MovementType evaluateBigramMovement(KeyboardLayout layout, String bigram) {
+        if (bigram == null || bigram.length() != 2) {
+            return null;
+        }
+
+        Key key1 = layout.getKey(bigram.charAt(0));
+        Key key2 = layout.getKey(bigram.charAt(1));
+
+        if (key1 == null || key2 == null) {
+            return null;
+        }
+
+        // Vérifier les différents types de mouvements dans l'ordre de priorité
+        if (isSameFinger(key1, key2)) {
+            return MovementType.SAME_FINGER;
+        }
+        
+        if (isLateralStretch(key1, key2)) {
+            return MovementType.LATERAL_STRETCH;
+        }
+        
+        if (isScissors(key1, key2)) {
+            return MovementType.SCISSORS;
+        }
+
+        if (!isSameHand(key1, key2)) {
+            return MovementType.HAND_ALTERNATION;
+        }
+
+        if (isInwardRoll(key1, key2)) {
+            return MovementType.INWARD_ROLL;
+        }
+
+        if (isOutwardRoll(key1, key2)) {
+            return MovementType.OUTWARD_ROLL;
+        }
+
+        // Si aucun mouvement spécifique n'est détecté
+        return MovementType.REDIRECTION;
     }
 }
