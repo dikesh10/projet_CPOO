@@ -21,7 +21,9 @@ public class KeyboardOptimizer {
      * Crée un nouvel optimiseur de disposition.
      */
     public KeyboardOptimizer(LayoutEvaluator evaluator) {
-        this(evaluator, 100, 1000, 0.1, 0.8);
+        // Réduire la taille de population et le nombre de générations
+        // Augmenter les taux de mutation et croisement pour une convergence plus rapide
+        this(evaluator, 50, 100, 0.2, 0.9);
     }
     
     /**
@@ -54,6 +56,9 @@ public class KeyboardOptimizer {
         
         System.out.printf("Score initial : %.2f%n%n", bestScore);
         
+        int generationsWithoutImprovement = 0;
+        double previousBestScore = bestScore;
+        
         for (int generation = 0; generation < maxGenerations; generation++) {
             // Évaluer la population
             Map<KeyboardLayout, Double> scores = new HashMap<>();
@@ -71,6 +76,15 @@ public class KeyboardOptimizer {
             if (generationBestScore < bestScore) {
                 bestScore = generationBestScore;
                 bestLayout = generationBest;
+                generationsWithoutImprovement = 0;
+            } else {
+                generationsWithoutImprovement++;
+            }
+            
+            // Arrêter si pas d'amélioration depuis 20 générations
+            if (generationsWithoutImprovement > 20) {
+                System.out.println("Convergence atteinte après " + generation + " générations");
+                break;
             }
             
             // Créer la nouvelle génération

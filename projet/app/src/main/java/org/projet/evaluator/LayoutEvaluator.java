@@ -17,6 +17,23 @@ public class LayoutEvaluator {
     private long totalTrigramCount;
     private Map<KeyboardLayout.Finger, Double> fingerLoads;
     
+    private static final Map<KeyboardLayout.Finger, Double> IDEAL_FINGER_LOADS;
+    static {
+        IDEAL_FINGER_LOADS = new EnumMap<>(KeyboardLayout.Finger.class);
+        // Index (les plus forts)
+        IDEAL_FINGER_LOADS.put(KeyboardLayout.Finger.LEFT_INDEX, 18.0);
+        IDEAL_FINGER_LOADS.put(KeyboardLayout.Finger.RIGHT_INDEX, 18.0);
+        // Majeurs (assez forts)
+        IDEAL_FINGER_LOADS.put(KeyboardLayout.Finger.LEFT_MIDDLE, 15.0);
+        IDEAL_FINGER_LOADS.put(KeyboardLayout.Finger.RIGHT_MIDDLE, 15.0);
+        // Annulaires (plus faibles)
+        IDEAL_FINGER_LOADS.put(KeyboardLayout.Finger.LEFT_RING, 12.0);
+        IDEAL_FINGER_LOADS.put(KeyboardLayout.Finger.RIGHT_RING, 12.0);
+        // Auriculaires (les plus faibles)
+        IDEAL_FINGER_LOADS.put(KeyboardLayout.Finger.LEFT_PINKY, 5.0);
+        IDEAL_FINGER_LOADS.put(KeyboardLayout.Finger.RIGHT_PINKY, 5.0);
+    }
+
     public LayoutEvaluator(Map<String, Long> ngramFrequencies) {
         this.ngramFrequencies = Map.copyOf(ngramFrequencies);
         this.movementEvaluator = new MovementEvaluator();
@@ -74,9 +91,6 @@ public class LayoutEvaluator {
         // Réinitialiser les compteurs
         movementCounts.clear();
         fingerLoads.clear();
-        for (MovementType type : MovementType.values()) {
-            movementCounts.put(type, 0L);
-        }
         for (KeyboardLayout.Finger finger : KeyboardLayout.Finger.values()) {
             fingerLoads.put(finger, 0.0);
         }
@@ -85,18 +99,18 @@ public class LayoutEvaluator {
         
         double score = 0.0;
         
-        // Évaluer les bigrammes et trigrammes
-        for (var entry : ngramFrequencies.entrySet()) {
+        // Évaluer les n-grammes
+        for (Map.Entry<String, Long> entry : ngramFrequencies.entrySet()) {
             String ngram = entry.getKey();
             long frequency = entry.getValue();
             
-            if (ngram.length() == 2) {
-                totalBigramCount += frequency;
-                score += evaluateBigram(layout, ngram, frequency);
-            }
-            else if (ngram.length() == 3) {
-                totalTrigramCount += frequency;
+            if (ngram.length() == 3) {
                 score += evaluateTrigram(layout, ngram, frequency);
+                totalTrigramCount += frequency;
+            }
+            else if (ngram.length() == 2) {
+                score += evaluateBigram(layout, ngram, frequency);
+                totalBigramCount += frequency;
             }
             else if (ngram.length() == 1) {
                 // Mettre à jour les charges des doigts
@@ -109,6 +123,9 @@ public class LayoutEvaluator {
                 }
             }
         }
+        
+        // Ajouter la pénalité pour la répartition des doigts
+        score += calculateFingerLoadScore();
         
         return score;
     }
@@ -206,6 +223,21 @@ public class LayoutEvaluator {
         return score * frequency;
     }
     
+    /**
+     * Calcule la distance entre la répartition actuelle et la répartition idéale.
+     * @return Le score de pénalité pour la répartition des doigts
+     */
+    private double calculateFingerLoadScore() {
+        double score = 0.0;
+        for (Map.Entry<KeyboardLayout.Finger, Double> entry : fingerLoads.entrySet()) {
+            KeyboardLayout.Finger finger = entry.getKey();
+            double actualLoad = entry.getValue();
+            double idealLoad = IDEAL_FINGER_LOADS.get(finger);
+            score += Math.abs(actualLoad - idealLoad);
+        }
+        return score * 0.1; // Facteur de pondération pour ne pas trop pénaliser
+    }
+
     /**
      * Affiche les statistiques d'évaluation d'une disposition.
      */

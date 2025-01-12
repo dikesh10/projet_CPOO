@@ -3,61 +3,30 @@
 package org.projet {
     class App {
         + main(args: String[]): void
-        - analyzeTexts(directory: Path): void
-        - evaluateLayout(layout: KeyboardLayout): void
-        - optimizeLayout(layout: KeyboardLayout): void
-        - displayResults(): void
+        - analyzeTexts(directory: Path): TextAnalyzer
+        - evaluateLayout(layout: KeyboardLayout): double
+        - optimizeLayout(layout: KeyboardLayout): KeyboardLayout
+        - saveFrequenciesToFile(analyzer: TextAnalyzer, filename: String, ngramLength: int): void
     }
 }
 
 package org.projet.analyzer {
     class TextAnalyzer {
-        - characterFrequencies: Map<Character, Integer>
-        - bigramFrequencies: Map<String, Integer>
-        - trigramFrequencies: Map<String, Integer>
-        - totalCharacters: int
+        - frequencies: Map<String, Long>
+        - totalCharacters: long
+        - executor: ExecutorService
         + analyzeText(text: String): void
-        + getCharacterFrequency(c: Character): int
-        + getBigramFrequency(bigram: String): int
-        + getTrigramFrequency(trigram: String): int
-        + getTotalCharacters(): int
-        + getCharacterPercentage(c: Character): double
-        + getBigramPercentage(bigram: String): double
-        + getTrigramPercentage(trigram: String): double
+        + analyzeTexts(texts: List<String>): void
+        + getFrequency(ngram: String): long
+        + getAllFrequencies(): Map<String, Long>
+        + getTotalCharacters(): long
+        + shutdown(): void
     }
 
-    class TextLoader {
-        + {static} loadText(path: Path): String
-        + {static} loadFromDirectory(dir: Path): List<String>
-    }
-}
-
-package org.projet.config {
-    class KeyboardConfigLoader {
-        - mapper: ObjectMapper
-        + loadLayout(configFile: Path): Optional<KeyboardLayout>
-    }
-
-    class KeyboardConfig {
-        - name: String
-        - description: String
-        - keys: Map<Character, KeyConfig>
-        + getName(): String
-        + getDescription(): String
-        + getKeys(): Map<Character, KeyConfig>
-    }
-
-    class KeyConfig {
-        - row: int
-        - column: int
-        - finger: String
-        - shiftProduces: String
-        - altgrProduces: String
-        + getRow(): int
-        + getColumn(): int
-        + getFinger(): String
-        + getShiftProduces(): String
-        + getAltgrProduces(): String
+    class AccentAnalyzer {
+        - {static} ACCENT_MAP: Map<Character, String>
+        + {static} decompose(text: String): String
+        + {static} getKeySequence(c: char): String
     }
 }
 
@@ -67,6 +36,8 @@ package org.projet.model {
         - characterToKeyMap: Map<Character, Key>
         + name(): String
         + characterToKeyMap(): Map<Character, Key>
+        + copy(): KeyboardLayout
+        + swapKeys(char1: char, char2: char): KeyboardLayout
     }
 
     class Key {
@@ -93,35 +64,58 @@ package org.projet.model {
         RIGHT_PINKY
     }
 
-    enum Hand {
-        LEFT
-        RIGHT
+    class KeyboardDisplay {
+        + {static} displayLayout(layout: KeyboardLayout): void
+        + {static} displayChanges(original: KeyboardLayout, optimized: KeyboardLayout): void
     }
 }
 
 package org.projet.evaluator {
     class LayoutEvaluator {
-        - textAnalyzer: TextAnalyzer
-        - weights: Map<String, Double>
-        + evaluate(layout: KeyboardLayout): double
-        - evaluateBigrams(layout: KeyboardLayout): double
-        - evaluateTrigrams(layout: KeyboardLayout): double
-        - calculateFingerLoads(layout: KeyboardLayout): Map<Finger, Double>
-        - isSameFinger(key1: Key, key2: Key): boolean
-        - isLateralExtension(key1: Key, key2: Key): boolean
-        - isHandAlternation(key1: Key, key2: Key): boolean
-        - isInwardRoll(key1: Key, key2: Key): boolean
-        - isOutwardRoll(key1: Key, key2: Key): boolean
+        - ngramFrequencies: Map<String, Long>
+        - movementEvaluator: MovementEvaluator
+        - movementCounts: Map<MovementType, Long>
+        - fingerLoads: Map<Finger, Double>
+        + evaluateLayout(layout: KeyboardLayout): double
+        + displayEvaluation(layout: KeyboardLayout): void
+        - evaluateBigram(layout: KeyboardLayout, bigram: String, frequency: long): double
+        - evaluateTrigram(layout: KeyboardLayout, trigram: String, frequency: long): double
+        - calculateFingerLoadScore(): double
+    }
+
+    class MovementEvaluator {
+        - {static} MOVEMENT_WEIGHTS: Map<MovementType, Double>
+        + evaluateMovement(key1: Key, key2: Key): MovementType
+        + evaluateTrigramMovement(key1: Key, key2: Key, key3: Key): MovementType
+        + getWeight(type: MovementType): double
+    }
+
+    enum MovementType {
+        SAME_FINGER
+        LATERAL_EXTENSION
+        SCISSORS
+        HAND_ALTERNATION
+        INWARD_ROLL
+        OUTWARD_ROLL
+        BAD_REDIRECTION
+        REDIRECTION
+        SKIPGRAM_SAME_FINGER
     }
 }
 
 package org.projet.optimizer {
     class KeyboardOptimizer {
         - evaluator: LayoutEvaluator
-        - currentLayout: KeyboardLayout
-        + optimize(layout: KeyboardLayout): KeyboardLayout
-        - swapKeys(layout: KeyboardLayout, key1: Character, key2: Character): KeyboardLayout
-        - findBestSwap(layout: KeyboardLayout): Pair<Character, Character>
+        - random: Random
+        - populationSize: int
+        - maxGenerations: int
+        - mutationRate: double
+        - crossoverRate: double
+        + optimize(initial: KeyboardLayout): KeyboardLayout
+        - initializePopulation(initial: KeyboardLayout): List<KeyboardLayout>
+        - selectParent(population: List<KeyboardLayout>, scores: Map<KeyboardLayout, Double>): KeyboardLayout
+        - crossover(parent1: KeyboardLayout, parent2: KeyboardLayout): List<KeyboardLayout>
+        - mutate(layout: KeyboardLayout): KeyboardLayout
     }
 }
 
@@ -129,19 +123,15 @@ package org.projet.optimizer {
 App --> TextAnalyzer
 App --> LayoutEvaluator
 App --> KeyboardOptimizer
-App --> KeyboardConfigLoader
+App --> KeyboardDisplay
 
-TextAnalyzer --> TextLoader
-
-KeyboardConfigLoader --> KeyboardConfig
-KeyboardConfig --> KeyConfig
-KeyboardConfig ..> KeyboardLayout
+TextAnalyzer --> AccentAnalyzer
 
 KeyboardLayout --> Key
 Key --> Finger
-Finger --> Hand
 
 KeyboardOptimizer --> LayoutEvaluator
-LayoutEvaluator --> TextAnalyzer
+LayoutEvaluator --> MovementEvaluator
+MovementEvaluator --> MovementType
 
 @enduml
