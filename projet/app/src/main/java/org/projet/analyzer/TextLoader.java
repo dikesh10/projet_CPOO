@@ -21,11 +21,14 @@ public class TextLoader {
         String content = Files.readString(filePath);
         System.out.println("Analyse du fichier : " + filePath.getFileName());
         
+        // Créer l'analyseur d'accents
+        AccentAnalyzer accentAnalyzer = new AccentAnalyzer(analyzer);
+        
         // Analyser les caractères individuels
         analyzer.analyzeText(content, 1);
         
-        // Analyser les bigrammes
-        analyzer.analyzeText(content, 2);
+        // Analyser les bigrammes en tenant compte des accents
+        accentAnalyzer.analyzeAccentedText(content);
         
         // Analyser les trigrammes
         analyzer.analyzeText(content, 3);
